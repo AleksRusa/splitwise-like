@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 import uvicorn
 
-app = FastAPI()
+# from routers
 
-if __name__ == "__main__":
-    uvicorn.run(app)
+app = FastAPI(
+    title="Splitwise", description="welcome to splitwise api clone", root_path="/api/v1"
+)
+
+app.include_router()
