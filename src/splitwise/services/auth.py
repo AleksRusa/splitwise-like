@@ -22,8 +22,10 @@ async def register_new_user(user: UserCreate, session: AsyncSession):
 
     cur_user = await select_user_by_email(user.email, session)
     if cur_user:
-        logger.error("email already registered")
-        raise HTTPException(status_code=400, detail="email already registered")
+        logger.error(f"email {cur_user.email} already registered")
+        raise HTTPException(
+            status_code=400, detail=f"email - {cur_user.email} already registered"
+        )
     try:
         new_user = User(email=user.email, password=hashed_pwd)
         session.add(new_user)

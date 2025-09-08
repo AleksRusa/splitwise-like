@@ -7,18 +7,10 @@ from splitwise.logger import logger
 
 
 router = APIRouter(prefix="/user", tags=["auth"])
-"""
-поступает POST запрос
-валидируем входящие данные через pydantic schemas
-получаем hash password
-отправляем запрос в базу данных
-обрабатываем ошибки
-возвращаем ответ
-"""
 
 
 @router.post("/register", response_model=UserOut)
 async def user_register(new_user: UserCreate, session=Depends(get_db)) -> str:
     result = await register_new_user(new_user, session)
-    logger.info("user successfully created")
+    logger.info(f"user {result.email} successfully created")
     return result
