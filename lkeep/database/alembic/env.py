@@ -8,7 +8,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from splitwise.database import Base
-from splitwise.models.user import User
+from splitwise.models.user import *
+from splitwise.models.expense import *
+from splitwise.models.group import *
 from splitwise.config import settings
 
 # this is the Alembic Config object, which provides

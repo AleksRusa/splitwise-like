@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .mixins import TimestampMixin
 from splitwise.database import Base
+from .group import Group
 
 
 class GroupMembers(Base):
