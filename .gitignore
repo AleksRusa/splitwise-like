@@ -1,0 +1,6 @@
+.venv/*
+*.pyc
+.env
+.log
+.dockerignore
+**/__pycache__/
