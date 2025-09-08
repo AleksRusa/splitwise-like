@@ -13,7 +13,6 @@ class UserCreate(BaseModel):
 
 
 class UserOut(BaseModel):
-    login: str
     email: str
 
     model_config = ConfigDict(from_attributes=True)
