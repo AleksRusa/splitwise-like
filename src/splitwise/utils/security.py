@@ -1,13 +1,22 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
+import jwt
 from passlib.context import CryptContext
+
+from splitwise.config import settings
 
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 
-async def create_access_token(data: dict, expires_delta: timedelta) -> str:
-    pass
+def create_access_token(data: dict, expires_delta: timedelta) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+    return encoded_jwt
 
 
 async def decode_token(token: str):
