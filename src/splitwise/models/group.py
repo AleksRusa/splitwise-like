@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from splitwise.database import Base
@@ -11,7 +11,9 @@ class Group(Base, TimestampMixin):
     id = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(64))
     description: Mapped[str] = mapped_column(String(256))
+    group_owner = mapped_column(Integer, ForeignKey("users.id"))
 
+    owner = relationship("User")
     members = relationship(
-        "User", secondary="group_membership", back_populates="groups"
+        "User", secondary="group_membership", foreign_keys=[group_owner]
     )

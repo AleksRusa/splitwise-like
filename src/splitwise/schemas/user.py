@@ -16,6 +16,10 @@ class UserDTO(BaseModel):
     password: str
 
 
+class UserId(BaseModel):
+    id: int
+
+
 class UserOut(BaseModel):
     email: str
 

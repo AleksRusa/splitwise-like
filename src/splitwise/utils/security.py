@@ -20,7 +20,9 @@ def create_access_token(data: dict, expires_delta: timedelta) -> str:
 
 
 async def decode_token(token: str):
-    pass
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    email = payload.get("sub")
+    return email
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
