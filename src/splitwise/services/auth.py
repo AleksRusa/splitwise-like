@@ -54,6 +54,7 @@ async def register_new_user(user: UserCreate, session: AsyncSession):
         return new_user
     except Exception as e:
         logger.error(f"exception - {e}")
+        raise e
 
 
 async def reliase_token(cur_user: UserOut) -> str:
@@ -77,6 +78,7 @@ async def get_user_from_cookies(request: Request, session: AsyncSession) -> User
     try:
         email = await decode_token(token)
         if email is None:
+
             logger.error(credentials_exception)
             raise credentials_exception
     except InvalidTokenError:

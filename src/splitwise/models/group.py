@@ -12,8 +12,9 @@ class Group(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(64))
     description: Mapped[str] = mapped_column(String(256))
     group_owner = mapped_column(Integer, ForeignKey("users.id"))
+    join_token = mapped_column(String(64), unique=True, index=True)
 
-    owner = relationship("User")
+    owner = relationship("User", foreign_keys=[group_owner])
     members = relationship(
-        "User", secondary="group_membership", foreign_keys=[group_owner]
+        "User", secondary="group_membership", back_populates="groups"
     )
