@@ -1,8 +1,8 @@
-"""deleted secondaty table
+"""empty message
 
-Revision ID: 0e95d6a207f5
-Revises: a296aeeca0c1
-Create Date: 2025-09-08 15:57:11.432519
+Revision ID: 01f3c71b37cc
+Revises: 56fb2da74200
+Create Date: 2025-09-10 12:37:27.191096
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0e95d6a207f5'
-down_revision: Union[str, Sequence[str], None] = 'a296aeeca0c1'
+revision: str = '01f3c71b37cc'
+down_revision: Union[str, Sequence[str], None] = '56fb2da74200'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

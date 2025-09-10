@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, APIRouter, HTTPException, Request, Response
 
-from splitwise.schemas.user import UserCreate, UserDTO, UserOut, Token
+from splitwise.schemas.user import UserCreate, UserDTO, UserId, UserOut, Token
 from splitwise.services.auth import (
     get_user_from_cookies,
     register_new_user,
@@ -57,6 +57,6 @@ async def login_for_access_token(
 @router.get("/me")
 async def get_current_user_from_token(
     request: Request, session=Depends(get_db)
-) -> UserOut:
+) -> UserId:
     current_user = await get_user_from_cookies(request, session)
     return current_user

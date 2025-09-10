@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, Query
 from splitwise.logger import logger
 from splitwise.database import get_db
 from splitwise.routers.auth import get_current_user_from_token
-from splitwise.schemas.group import GroupCreate
+from splitwise.schemas.group import GroupCreate, GroupData
 from splitwise.schemas.user import UserId
 from splitwise.services.group import (
     add_user_to_group_via_link,
     create_group,
     create_invite_link,
+    delete_group_by_name,
 )
 
 
@@ -48,4 +49,25 @@ async def join_group_via_link(
     user_id: UserId = Depends(get_current_user_from_token),
 ) -> str:
     message = await add_user_to_group_via_link(token, session, user_id.id)
+    return message
+
+
+@router.delete("/delete_group")
+async def delete_group(
+    group_name: str,
+    session=Depends(get_db),
+    user_id: UserId = Depends(get_current_user_from_token),
+) -> str:
+    name = await delete_group_by_name(group_name, session, user_id.id)
+    return f"group '{name}' deleted"
+
+
+@router.patch("/change_group_data")
+async def chenge_group_data(
+    group_id: int,
+    data: GroupData,
+    session=Depends(get_db),
+    user_id: UserId = Depends(get_current_user_from_token),
+) -> str:
+    message = await chenge_group_data(group_id, data, session, user_id)
     return message

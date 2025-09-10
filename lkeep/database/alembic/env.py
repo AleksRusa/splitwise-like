@@ -2,18 +2,21 @@ import asyncio
 from logging.config import fileConfig
 
 from sqlalchemy import pool
+from sqlalchemy.orm import configure_mappers
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
 from splitwise.database import Base
-from splitwise.models.user import *
-from splitwise.models.expense import *
-from splitwise.models.group import *
 from splitwise.config import settings
 
-# this is the Alembic Config object, which provides
+from splitwise.models.user import User, GroupMembers
+from splitwise.models.group import Group
+from splitwise.models.expense import Expense, ExpenseSplit
+
+configure_mappers()
+# Экспортируем их (опционально)
 # access to the values within the .ini file in use.
 config = context.config
 

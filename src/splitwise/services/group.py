@@ -5,11 +5,11 @@ from splitwise.config import settings
 from splitwise.logger import logger
 from splitwise.models.user import GroupMembers
 from splitwise.schemas.user import UserId
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from splitwise.models.group import Group
-from splitwise.schemas.group import GroupCreate
+from splitwise.schemas.group import GroupCreate, GroupData
 
 
 async def create_group(data: GroupCreate, session: AsyncSession, user_id: int) -> str:
@@ -39,6 +39,16 @@ async def get_group_by_group_id(
         logger.error(f"group with id - '{group_id} is not found")
         raise HTTPException(status_code=403, detail=f"group not found")
     return group
+
+
+async def get_group_owner_by_group_name(group_name: str, session: AsyncSession) -> int:
+    stmt = select(Group.group_owner_id).where(Group.name == group_name)
+    result = await session.execute(stmt)
+    group_owner = result.scalar_one_or_none()
+    if not group_owner:
+        logger.error(f"group '{group_name}' is not found")
+        raise HTTPException(status_code=403, detail=f"group not found")
+    return group_owner
 
 
 async def get_group_by_join_token(token: str, session: AsyncSession) -> Optional[Group]:
@@ -91,3 +101,46 @@ async def add_user_to_group_via_link(
         raise HTTPException(status_code=409, detail="user already in a group")
     result = await add_user_to_group(group.id, user_id, session)
     return result
+
+
+async def delete_group_by_name(
+    group_name: str,
+    session: AsyncSession,
+    user_id=int,
+) -> str:
+    group_owner = get_group_owner_by_group_name(group_name, session)
+    if group_owner != user_id:
+        logger.error(
+            f"user - '{user_id}' don't have enough permissions in group - '{group_name}'"
+        )
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    try:
+        stmt = delete(Group).where(Group.name == group_name).returning(Group.name)
+        result = await session.execute(stmt)
+        return result.scalar()
+    except Exception as e:
+        logger.error(f"exception - {e}, while deleting group")
+        raise e
+
+
+async def change_group_data(
+    group_id: int, data: GroupData, session: AsyncSession, user_id: int
+) -> str:
+    group: Group = await get_group_by_group_id(group_id, session)
+    if group.group_owner_id != user_id:
+        logger.error(
+            f"user - '{user_id}' don't have enough permissions in group - '{group.name}'"
+        )
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    try:
+        update_values = data.model_dump(exclude_unset=True)
+        stmt = update(Group).where(Group.id == data.id).values(**update_values)
+        await session.execute(stmt)
+        await session.commit()
+        logger.info(
+            f"fields {update_values} successfully updated in group - '{group_id}"
+        )
+        return "fields successfully updated"
+    except Exception as e:
+        logger.error(f"exception - {e}, while updating group")
+        raise e

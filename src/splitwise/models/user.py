@@ -5,7 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .mixins import TimestampMixin
 from splitwise.database import Base
-from .group import Group
 
 
 class GroupMembers(Base):
@@ -13,7 +12,7 @@ class GroupMembers(Base):
 
     id = mapped_column(Integer, primary_key=True)
     user_id = mapped_column(Integer, ForeignKey("users.id"))
-    group_id = mapped_column(Integer, ForeignKey("groups.id"))
+    group_id = mapped_column(Integer, ForeignKey("groups.id", ondelete="CASCADE"))
     joined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
