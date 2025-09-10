@@ -7,6 +7,10 @@ class GroupCreate(BaseModel):
     description: str
 
 
-class GroupData(BaseModel):
+class GroupChangeData(BaseModel):
     name: Optional[str]
     description: Optional[str]
+
+
+class GroupOwner(BaseModel):
+    group_owner_id: int

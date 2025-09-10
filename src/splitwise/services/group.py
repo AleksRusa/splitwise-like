@@ -9,7 +9,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from splitwise.models.group import Group
-from splitwise.schemas.group import GroupCreate, GroupData
+from splitwise.schemas.group import GroupChangeData, GroupCreate
 
 
 async def create_group(data: GroupCreate, session: AsyncSession, user_id: int) -> str:
@@ -51,7 +51,7 @@ async def get_group_owner_by_group_name(group_name: str, session: AsyncSession) 
     return group_owner
 
 
-async def get_group_by_name(group_name: str, session: AsyncSession) -> GroupData:
+async def get_group_by_name(group_name: str, session: AsyncSession) -> Group:
     stmt = select(Group).where(Group.name == group_name)
     result = await session.execute(stmt)
     group = result.scalar_one_or_none()
@@ -109,22 +109,20 @@ async def add_user_to_group_via_link(
     return result
 
 
-async def validate_permissions_for_group(user_id, group_owner):
+async def validate_permissions_for_group(user_id: int, group_owner: int):
     if group_owner != user_id:
         logger.error(f"user - '{user_id}' don't have enough permissions in group")
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    return
+    return None
 
 
-async def delete_group_by_name(
-    group_name: str,
+async def delete_group_by_id(
+    group_id: int,
     session: AsyncSession,
-    user_id=int,
+    user_id: int,
 ) -> str:
-    group_owner = await get_group_owner_by_group_name(group_name, session)
-    await validate_permissions_for_group(user_id, group_owner)
     try:
-        stmt = delete(Group).where(Group.name == group_name).returning(Group.name)
+        stmt = delete(Group).where(Group.id == group_id).returning(Group.name)
         result = await session.execute(stmt)
         await session.commit()
         return result.scalar()
@@ -134,10 +132,11 @@ async def delete_group_by_name(
 
 
 async def change_group_data_by_id(
-    group_id: int, data: GroupData, session: AsyncSession, user_id: int
+    group_id: int,
+    data: GroupChangeData,
+    session: AsyncSession,
+    user_id: int,
 ) -> str:
-    group: Group = await get_group_by_group_id(group_id, session)
-    await validate_permissions_for_group(user_id, group.group_owner_id)
     try:
         update_values = data.model_dump(exclude_unset=True)
         stmt = update(Group).where(Group.id == group_id).values(**update_values)

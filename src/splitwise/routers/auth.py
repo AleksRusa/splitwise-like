@@ -55,8 +55,6 @@ async def login_for_access_token(
 
 
 @router.get("/me")
-async def get_current_user_from_token(
-    request: Request, session=Depends(get_db)
-) -> UserId:
+async def get_current_user_from_token(request: Request, session=Depends(get_db)) -> int:
     current_user = await get_user_from_cookies(request, session)
-    return current_user
+    return current_user.id
