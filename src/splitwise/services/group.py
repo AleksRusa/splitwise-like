@@ -51,6 +51,16 @@ async def get_group_owner_by_group_name(group_name: str, session: AsyncSession) 
     return group_owner
 
 
+async def get_group_by_name(group_name: str, session: AsyncSession) -> GroupData:
+    stmt = select(Group).where(Group.name == group_name)
+    result = await session.execute(stmt)
+    group = result.scalar_one_or_none()
+    if not group:
+        logger.error(f"group '{group_name}' is not found")
+        raise HTTPException(status_code=403, detail=f"group not found")
+    return group
+
+
 async def get_group_by_join_token(token: str, session: AsyncSession) -> Optional[Group]:
     stmt = select(Group).where(Group.join_token == token)
     result = await session.execute(stmt)
@@ -63,11 +73,7 @@ async def get_group_by_join_token(token: str, session: AsyncSession) -> Optional
 
 async def create_invite_link(group_id: int, session: AsyncSession, user_id: int):
     group: Group = await get_group_by_group_id(group_id=group_id, session=session)
-    if group.group_owner_id != user_id:
-        logger.error(
-            f"user - '{user_id}' don't have enough permissions in group - '{group_id}'"
-        )
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+    await validate_permissions_for_group(user_id, group.group_owner_id)
     url = f"{settings.BASE_APP_URL}/groups/join_group?token={group.join_token}"
     return url
 
@@ -103,38 +109,38 @@ async def add_user_to_group_via_link(
     return result
 
 
+async def validate_permissions_for_group(user_id, group_owner):
+    if group_owner != user_id:
+        logger.error(f"user - '{user_id}' don't have enough permissions in group")
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    return
+
+
 async def delete_group_by_name(
     group_name: str,
     session: AsyncSession,
     user_id=int,
 ) -> str:
-    group_owner = get_group_owner_by_group_name(group_name, session)
-    if group_owner != user_id:
-        logger.error(
-            f"user - '{user_id}' don't have enough permissions in group - '{group_name}'"
-        )
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+    group_owner = await get_group_owner_by_group_name(group_name, session)
+    await validate_permissions_for_group(user_id, group_owner)
     try:
         stmt = delete(Group).where(Group.name == group_name).returning(Group.name)
         result = await session.execute(stmt)
+        await session.commit()
         return result.scalar()
     except Exception as e:
         logger.error(f"exception - {e}, while deleting group")
         raise e
 
 
-async def change_group_data(
+async def change_group_data_by_id(
     group_id: int, data: GroupData, session: AsyncSession, user_id: int
 ) -> str:
     group: Group = await get_group_by_group_id(group_id, session)
-    if group.group_owner_id != user_id:
-        logger.error(
-            f"user - '{user_id}' don't have enough permissions in group - '{group.name}'"
-        )
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+    await validate_permissions_for_group(user_id, group.group_owner_id)
     try:
         update_values = data.model_dump(exclude_unset=True)
-        stmt = update(Group).where(Group.id == data.id).values(**update_values)
+        stmt = update(Group).where(Group.id == group_id).values(**update_values)
         await session.execute(stmt)
         await session.commit()
         logger.info(

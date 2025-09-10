@@ -6,9 +6,11 @@ from splitwise.schemas.group import GroupCreate, GroupData
 from splitwise.schemas.user import UserId
 from splitwise.services.group import (
     add_user_to_group_via_link,
+    change_group_data_by_id,
     create_group,
     create_invite_link,
     delete_group_by_name,
+    get_group_by_name,
 )
 
 
@@ -69,5 +71,15 @@ async def chenge_group_data(
     session=Depends(get_db),
     user_id: UserId = Depends(get_current_user_from_token),
 ) -> str:
-    message = await chenge_group_data(group_id, data, session, user_id)
+    message = await change_group_data_by_id(group_id, data, session, user_id.id)
     return message
+
+
+@router.get("/get_group")
+async def get_group(
+    name: str,
+    session=Depends(get_db),
+    user_id: UserId = Depends(get_current_user_from_token),
+) -> GroupData:
+    group = await get_group_by_name(name, session)
+    return group
