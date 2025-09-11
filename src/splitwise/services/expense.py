@@ -5,7 +5,7 @@ from splitwise.models.group import Group
 from splitwise.schemas.expense import ExpenseCreate, ExpenseDTO
 
 from splitwise.services.group import get_group_by_group_id, get_group_members
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -92,3 +92,24 @@ async def select_all_group_expenses(group_id: int, session: AsyncSession):
             f"exception - {e} while selected all expenses for group_id={group_id}"
         )
         raise e
+
+
+async def get_summarize_user_expenses_in_group(
+    group_id: int,
+    session: AsyncSession,
+    user_id: int,
+) -> str:
+    stmt = (
+        select(ExpenseSplit)
+        .join(ExpenseSplit.expense)
+        .where(Expense.group_id == group_id)
+        .where(
+            or_(
+                ExpenseSplit.user_paid_id == user_id,
+                ExpenseSplit.user_owes_id == user_id,
+            )
+        )
+        .order_by(ExpenseSplit.amount.asc())
+    )
+    result = await session.execute(stmt)
+    user_splits = result.scalars().all()
