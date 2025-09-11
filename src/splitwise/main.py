@@ -4,6 +4,7 @@ import uvicorn
 from sqlalchemy.orm import configure_mappers
 from splitwise.routers.auth import router as user_router
 from splitwise.routers.group import router as group_router
+from splitwise.routers.expense import router as expense_router
 
 from splitwise.models import User, GroupMembers, Expense, ExpenseSplit, Group
 
@@ -15,3 +16,4 @@ app = FastAPI(
 
 app.include_router(router=user_router)
 app.include_router(router=group_router)
+app.include_router(router=expense_router)

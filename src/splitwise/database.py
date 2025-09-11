@@ -6,7 +6,7 @@ from .config import settings
 
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=True,  # TODO отключить на продакшене
+    echo=False,  # TODO отключить на продакшене
     future=True,
 )
 

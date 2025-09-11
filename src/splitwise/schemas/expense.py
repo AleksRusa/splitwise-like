@@ -27,5 +27,12 @@ from pydantic import BaseModel
 class ExpenseCreate(BaseModel):
     description: str
     amount: Decimal
-    group_id: int
     user_paid_id: int
+    splits_between: list[int]
+
+
+# class ExpenseSplitDTO(BaseModel):
+#     expense_id: int
+#     users_owes_id: set[int]
+#     user_paid_id: int
+#     amount: Decimal

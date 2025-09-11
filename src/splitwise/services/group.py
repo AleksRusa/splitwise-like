@@ -12,7 +12,7 @@ from splitwise.models.group import Group
 from splitwise.schemas.group import GroupChangeData, GroupCreate
 
 
-async def create_group(data: GroupCreate, session: AsyncSession, user_id: int) -> str:
+async def create_group(data: GroupCreate, session: AsyncSession, user_id: int):
     try:
         new_group = Group(
             name=data.name,
@@ -23,7 +23,7 @@ async def create_group(data: GroupCreate, session: AsyncSession, user_id: int) -
         session.add(new_group)
         await session.commit()
         await add_user_to_group(new_group.id, new_group.group_owner_id, session)
-        return new_group.name
+        return new_group
     except Exception as e:
         logger.error(f"exception - {e}")
         raise e

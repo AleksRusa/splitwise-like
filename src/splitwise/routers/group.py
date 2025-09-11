@@ -24,9 +24,9 @@ async def create_new_group(
     session=Depends(get_db),
     user_id: int = Depends(get_current_user_from_token),
 ) -> str:
-    new_group_name = await create_group(data, session, user_id)
-    logger.info(f"group '{new_group_name}' successfully created")
-    return f"group '{new_group_name}' successfully created"
+    new_group = await create_group(data, session, user_id)
+    logger.info(f"group '{new_group.name}' successfully created - id={new_group.id}")
+    return f"group '{new_group.name}' successfully created - id={new_group.id}"
 
 
 @router.get("/join_link")
