@@ -1,8 +1,7 @@
 from functools import wraps
 from typing import Callable
-from fastapi import HTTPException, HTTPException
+from fastapi import HTTPException
 from splitwise.models.group import Group
-from sqlalchemy.ext.asyncio import AsyncSession
 from splitwise.logger import logger
 from splitwise.schemas.group import GroupOwner
 from splitwise.services.group import get_group_by_group_id, get_group_by_name

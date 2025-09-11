@@ -81,7 +81,8 @@ async def create_invite_link(group_id: int, session: AsyncSession, user_id: int)
 async def get_group_members(group_id: int, session: AsyncSession):
     stmt = select(GroupMembers.user_id).where(GroupMembers.group_id == group_id)
     result = await session.execute(stmt)
-    return result.scalars().all()
+    members = result.scalars().all()
+    return members
 
 
 async def add_user_to_group(group_id: int, user_id: int, session: AsyncSession):
