@@ -20,8 +20,9 @@ class ExpenseSplit(Base):
     amount: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
 """
 
+from datetime import datetime
 from decimal import Decimal
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ExpenseCreate(BaseModel):
@@ -31,8 +32,10 @@ class ExpenseCreate(BaseModel):
     splits_between: list[int]
 
 
-# class ExpenseSplitDTO(BaseModel):
-#     expense_id: int
-#     users_owes_id: set[int]
-#     user_paid_id: int
-#     amount: Decimal
+class ExpenseDTO(BaseModel):
+    description: str
+    amount: Decimal
+    user_paid_id: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

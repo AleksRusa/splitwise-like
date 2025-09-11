@@ -1,9 +1,12 @@
 from fastapi import HTTPException
 from splitwise.logger import logger
 from splitwise.models.expense import Expense, ExpenseSplit
-from splitwise.schemas.expense import ExpenseCreate
+from splitwise.models.group import Group
+from splitwise.schemas.expense import ExpenseCreate, ExpenseDTO
 
-from splitwise.services.group import get_group_members
+from splitwise.services.group import get_group_by_group_id, get_group_members
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -65,3 +68,27 @@ async def create_expense_splits(
             raise HTTPException(status_code=400, detail="can't create expense split")
     logger.info(f"created all splits for expense_id={expense_id}")
     return "expense added successfully"
+
+
+async def select_all_group_expenses(group_id: int, session: AsyncSession):
+    try:
+        stmt = (
+            select(Group)
+            .where(Group.id == group_id)
+            .options(selectinload(Group.expenses))  # ← Явно загружаем expenses
+        )
+        result = await session.execute(stmt)
+        group = result.scalar_one_or_none()
+        if not group:
+            logger.error(f"group with id - '{group_id} is not found")
+            raise HTTPException(status_code=403, detail=f"group not found")
+        if not group.expenses:
+            logger.warning(f"group_id={group_id} don't have expenses")
+        else:
+            logger.info(f"selected expenses for group_id={group_id}")
+        return group.expenses
+    except Exception as e:
+        logger.error(
+            f"exception - {e} while selected all expenses for group_id={group_id}"
+        )
+        raise e

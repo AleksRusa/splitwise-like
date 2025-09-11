@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends
 from splitwise.database import get_db
 from splitwise.routers.auth import get_current_user_from_token
-from splitwise.schemas.expense import ExpenseCreate
-from splitwise.services.expense import create_expense
-from splitwise.utils.decorators import validate_user_permissions_for_group_id
+from splitwise.schemas.expense import ExpenseCreate, ExpenseDTO
+from splitwise.services.expense import create_expense, select_all_group_expenses
+from splitwise.utils.decorators import (
+    validate_user_membership_in_group,
+    validate_user_permissions_for_group_id,
+)
 
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
@@ -47,3 +50,14 @@ async def create_new_expense(
         group_id=group_id, expense_data=expense, session=session, user_id=user_id
     )
     return result
+
+
+@router.post("/get_all/group/{group_id}", response_model=list[ExpenseDTO])
+@validate_user_membership_in_group()
+async def get_all_expenses_for_group(
+    group_id: int,
+    session=Depends(get_db),
+    user_id=Depends(get_current_user_from_token),
+):
+    expenses = await select_all_group_expenses(group_id, session)
+    return expenses
