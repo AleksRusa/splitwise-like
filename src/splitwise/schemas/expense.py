@@ -39,3 +39,10 @@ class ExpenseDTO(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DebtItem(BaseModel):
+    direction: str
+    user_id: int
+    amount: Decimal
+    currency: str = "RUB"
