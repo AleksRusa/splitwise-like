@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "8000:8000"
+    depends_on:
+      - service-db
+    
+  service-db:
+    image: postgres:17.6-alpine
