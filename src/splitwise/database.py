@@ -3,10 +3,11 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from .config import settings
 
+DATABASE_URL = f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@localhost:5432/{settings.DB_NAME}"
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=False,  # TODO отключить на продакшене
+    url=DATABASE_URL,
+    echo=False,
     future=True,
 )
 
